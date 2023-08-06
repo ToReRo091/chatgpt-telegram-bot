@@ -1,6 +1,7 @@
 {
     "en": {
         "help_description":"Show help message",
+	"hello_text":"hello!",
         "reset_description":"Reset the conversation. Optionally pass high-level instructions (e.g. /reset You are a helpful assistant)",
         "image_description":"Generate image from prompt (e.g. /image cat)",
         "stats_description":"Get your current usage statistics",
@@ -210,6 +211,7 @@
     },
     "ru": {
         "help_description":"Показать справочное сообщение",
+	"hello_text":"привет!",
         "reset_description":"Перезагрузить разговор. По желанию передай общие инструкции (например, /reset ты полезный помощник)",
         "image_description":"Создать изображение по запросу (например, /image кошка)",
         "stats_description":"Получить статистику использования",

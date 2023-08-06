@@ -202,7 +202,8 @@ class ChatGPTTelegramBot:
         print(f"LOG: Get Username: {username} UID:{user_id}")
         print(f"LOG: date: {date}")
         date_format = date.strftime("%Y-%m-%d %H:%M:%S")
-        greetings_text = f"{username}, привет!"
+        greetings_text = f"{username}, " + localized_text("hello_text", self.config['bot_language'])
+
 
         query = f"INSERT INTO users (user_id, date_creation, user_first_name) VALUES({user_id}, '{date_format}', '{username}');"
         db.query_update(query, None)
