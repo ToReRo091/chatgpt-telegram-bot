@@ -72,6 +72,8 @@ class ChatGPTTelegramBot:
         query = "SELECT LOWER(word) FROM ban_words;"
         ban_bd = db.fetch_all(query, None)
         self.banned_words = [i[0] for i in ban_bd]
+        self.subscribe_title = localized_text('subscribe_title', bot_language)
+        self.provider_data = localized_text('provider_data', bot_language)
 
     async def prompt_wrapper(self, update, context):
         await self.prompt(update, context)
@@ -221,21 +223,7 @@ class ChatGPTTelegramBot:
                 prices=prices,
                 need_email=True,
                 send_email_to_provider=True,
-                provider_data={
-                    "receipt":{
-                        "items":[
-                            {
-                                "description": "SympaBot Pro",
-                                "quantity":"1.00",
-                                "amount":{
-                                    "value": "200.00",
-                                    "currency": "RUB"
-                                },
-                                "vat_code": 1
-                            }
-                        ]
-                    }
-                }
+                provider_data=self.provider_data
             )
 
     async def precheckout_subscription_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
