@@ -72,8 +72,6 @@ class ChatGPTTelegramBot:
         query = "SELECT LOWER(word) FROM ban_words;"
         ban_bd = db.fetch_all(query, None)
         self.banned_words = [i[0] for i in ban_bd]
-        self.subscribe_title = localized_text('subscribe_title', bot_language)
-        self.provider_data = localized_text('provider_data', bot_language)
 
     async def prompt_wrapper(self, update, context):
         await self.prompt(update, context)
@@ -171,7 +169,8 @@ class ChatGPTTelegramBot:
         Offering and activating the trial subscription
         """
         logging.info(f'Offering trial for user {update.message.from_user.name} (id: {update.message.from_user.id})')
-        if await is_in_trial(update.message.from_user.id):
+        db = self.db
+        if await is_in_trial(db, update, context):
             await update.message.reply_text(self.already_used_trial)
         else: 
             activate_btn = [
@@ -179,7 +178,6 @@ class ChatGPTTelegramBot:
             ]
             reply_markup = InlineKeyboardMarkup(activate_btn)
             await update.message.reply_text(self.not_used_trial, reply_markup=reply_markup)
-            await update.message.reply_text(self.rules_of_using)
 
     async def subscribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
@@ -223,7 +221,21 @@ class ChatGPTTelegramBot:
                 prices=prices,
                 need_email=True,
                 send_email_to_provider=True,
-                provider_data=self.provider_data
+                provider_data={
+                    "receipt":{
+                        "items":[
+                            {
+                                "description": "SympaBot Pro",
+                                "quantity":"1.00",
+                                "amount":{
+                                    "value": "200.00",
+                                    "currency": "RUB"
+                                },
+                                "vat_code": 1
+                            }
+                        ]
+                    }
+                }
             )
 
     async def precheckout_subscription_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -794,10 +806,10 @@ class ChatGPTTelegramBot:
         application.add_handler(
             MessageHandler(filters.SUCCESSFUL_PAYMENT, self.successful_payment_callback)
         )
-        application.add_handler(MessageHandler(
-            filters.AUDIO | filters.VOICE | filters.Document.AUDIO |
-            filters.VIDEO | filters.VIDEO_NOTE | filters.Document.VIDEO,
-            self.transcribe))
+        # application.add_handler(MessageHandler(
+        #     filters.AUDIO | filters.VOICE | filters.Document.AUDIO |
+        #     filters.VIDEO | filters.VIDEO_NOTE | filters.Document.VIDEO,
+        #     self.transcribe))
         application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self.prompt))
         application.add_handler(InlineQueryHandler(self.inline_query, chat_types=[
             constants.ChatType.GROUP, constants.ChatType.SUPERGROUP, constants.ChatType.PRIVATE

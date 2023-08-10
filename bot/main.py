@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from openai_helper import OpenAIHelper, default_max_tokens
-from telegram_bot import ChatGPTTelegramBot
+from bot.telegram_bot import ChatGPTTelegramBot
 from db import Database
 
 
