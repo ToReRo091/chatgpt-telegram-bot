@@ -46,7 +46,7 @@ class ChatGPTTelegramBot:
             BotCommand(command='reset', description=localized_text('reset_description', bot_language)),
             BotCommand(command='stats', description=localized_text('stats_description', bot_language)),
             BotCommand(command='trial', description=localized_text('trial_description', bot_language)),
-            BotCommand(command='subscribe', description=self.subscribe_description),
+            BotCommand(command='subscribe', description=localized_text('subscribe_description', bot_language)),
             BotCommand(command='feedback', description=localized_text('feedback_description', bot_language)),
             BotCommand(command='terms', description=localized_text('terms_description', bot_language)),
             BotCommand(command='test', description='test')
@@ -117,9 +117,7 @@ class ChatGPTTelegramBot:
                 '\n\n' +
                 '\n'.join(commands_description) +
                 '\n\n' +
-                localized_text('help_text', bot_language)[1] +
-                '\n\n' +
-                localized_text('help_text', bot_language)[2]
+                localized_text('help_text', bot_language)[1]
         )
         await update.message.reply_text(help_text, disable_web_page_preview=True)
 
