@@ -48,8 +48,7 @@ class ChatGPTTelegramBot:
             BotCommand(command='trial', description=localized_text('trial_description', bot_language)),
             BotCommand(command='subscribe', description=localized_text('subscribe_description', bot_language)),
             BotCommand(command='feedback', description=localized_text('feedback_description', bot_language)),
-            BotCommand(command='terms', description=localized_text('terms_description', bot_language)),
-            BotCommand(command='test', description='test')
+            BotCommand(command='terms', description=localized_text('terms_description', bot_language))
         ]
         self.group_commands = [BotCommand(
             command='chat', description=localized_text('chat_description', bot_language)
@@ -203,35 +202,37 @@ class ChatGPTTelegramBot:
             await get_trial_access(query.from_user.id, db)
             await update.effective_message.reply_text(message_thread_id=get_thread_id(update), text = self.success_activate_trial)
             return
-                
+
         elif query.data == "subscribe_access":
+            query_price = 'SELECT subscription_price FROM subscription WHERE subscription_id = 1'
             chat_id = query.from_user.id
+            price_from_db = db.fetch_one(query_price)
+            price = price_from_db * 100
             title = "SympaBot Pro: Безлимитный доступ"
             description = self.subscribe_description
             payload = "Custom-Payload"
             currency = "RUB"
-            price = 20000
             prices = [LabeledPrice("Test", price)]
             payment_provider = self.config['payment_provider']
             await context.bot.send_invoice(
-                chat_id=chat_id, 
-                title=title, 
-                description=description, 
+                chat_id=chat_id,
+                title=title,
+                description=description,
                 payload=payload,
-                provider_token=payment_provider, 
-                currency=currency, 
-                start_parameter="start", 
+                provider_token=payment_provider,
+                currency=currency,
+                start_parameter="start",
                 prices=prices,
                 need_email=True,
                 send_email_to_provider=True,
                 provider_data={
-                    "receipt":{
-                        "items":[
+                    "receipt": {
+                        "items": [
                             {
                                 "description": "SympaBot Pro",
-                                "quantity":"1.00",
-                                "amount":{
-                                    "value": "200.00",
+                                "quantity": "1.00",
+                                "amount": {
+                                    "value": price_from_db,
                                     "currency": "RUB"
                                 },
                                 "vat_code": 1
@@ -240,6 +241,8 @@ class ChatGPTTelegramBot:
                     }
                 }
             )
+
+
 
     async def precheckout_subscription_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.pre_checkout_query
@@ -611,13 +614,11 @@ class ChatGPTTelegramBot:
     async def message_censor(self, update: Update, context: ContextTypes.DEFAULT_TYPE, *args,
                             is_inline=False) -> bool:
         db = self.db
-        print(args)
         if args:
             message = args[0].lower()
         else:
             message = message_text(update.message).lower()
         message = ' '.join(re.findall(r'\b\w+\b', message))
-        print(message)
         if censor_check(db, self.banned_words, self.config, self.usage, update, message, is_inline=is_inline):
             logging.warning(f'User message has been censored') # {name} (id: {user_id})
             await self.send_censor_message(update, context, is_inline)
@@ -700,7 +701,6 @@ class ChatGPTTelegramBot:
         application.add_handler(CommandHandler('terms', self.terms))
         application.add_handler(CommandHandler('trial', self.trial))
         application.add_handler(CommandHandler('subscribe', self.subscribe))
-        application.add_handler(CommandHandler('test', self.test))
         application.add_handler(CallbackQueryHandler(self.inline_query_handler))
         application.add_handler(PreCheckoutQueryHandler(self.precheckout_subscription_callback))
         application.add_handler(CommandHandler(

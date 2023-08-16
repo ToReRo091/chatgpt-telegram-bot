@@ -157,14 +157,15 @@ async def get_trial_access(user_id, db):
 
 async def get_subscribe_access(user_id, db):
     subscription_access_query = "UPDATE users SET trial_flag = 'Y', date_expiration = %s, date_start = %s, subscription_id = 1 WHERE user_id = %s"
-    
+    transaction_query = "INSERT INTO transaction(date_transaction, transaction_amount, user_id, subscription_id) VALUES (%s, (SELECT subscription_price FROM subscription WHERE subscription_id = %s), %s, %s)"
     if await get_date_expiration(user_id, db) is not None:
         date_exp = await set_date_expiration(30, await get_date_expiration(user_id, db))
     else: 
         date_exp = await set_date_expiration(30, datetime.now())
 
     try:
-        check_res = db.query_update(subscription_access_query, (date_exp, datetime.now(), str(user_id),), "User %s got subscription access for 30 days" % user_id)
+        check_res = db.query_update(subscription_access_query, (date_exp, datetime.now(), user_id,), "User %s got subscription access for 30 days" % user_id)
+        db.query_update(transaction_query, (date_exp, 1, user_id, 1,))
     except:
         error_handler()
     if check_res != None:
@@ -174,9 +175,9 @@ async def get_subscribe_access(user_id, db):
 async def set_date_expiration(days, temp_date_exp):
     today = datetime.now()
     if(temp_date_exp >= today):
-        dp = today + timedelta(days=days)
-    else:
         dp = temp_date_exp + timedelta(days=days)
+    else:
+        dp = today + timedelta(days=days)
 
     return str(datetime(dp.year, dp.month, dp.day, dp.hour, dp.minute))
 
