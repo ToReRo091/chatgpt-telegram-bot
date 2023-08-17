@@ -139,7 +139,7 @@ class ChatGPTTelegramBot:
 
         try:
             query = "SELECT date_start, date_expiration FROM users WHERE user_id = %s"
-            list_date = db.fetch_all(query, (user_id,))
+            list_date = db.fetch_all(query, (str(user_id),))
             start_date = list_date[0][0]
             end_date = list_date[0][1]
             rest_time = list_date[0][1] - datetime.datetime.now()
