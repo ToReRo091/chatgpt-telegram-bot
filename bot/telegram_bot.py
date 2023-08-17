@@ -64,12 +64,13 @@ class ChatGPTTelegramBot:
         self.success_activate_subscribtion = localized_text('success_activate_subscribtion', bot_language)
         self.frequency_message = localized_text('frequency_error', bot_language)
         self.censor_message = localized_text('censor_error', bot_language)
+        self.disallowed_stats = localized_text('disalowed_stats', bot_language)
         self.usage = {}
         self.last_message = {}
         self.inline_queries_cache = {}
         self.last_message_time = {}
         query = "SELECT LOWER(word) FROM ban_words;"
-        ban_bd = db.fetch_all(query, None)
+        ban_bd = db.fetch_all(query)
         self.banned_words = [i[0] for i in ban_bd]
 
     async def prompt_wrapper(self, update, context):
@@ -132,7 +133,7 @@ class ChatGPTTelegramBot:
         db = self.db
         if not await self.check_time_delay(update, context):
             return
-        if not await self.check_allowed(update, context):
+        if not await self.check_allowed(update, context, is_stats=True):
             return
         logging.info(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
                      f'requested their usage statistics')
@@ -579,25 +580,32 @@ class ChatGPTTelegramBot:
             await edit_message_with_retry(localized_text('try_again', self.config['bot_language']), is_inline=True)
 
     async def check_allowed(self, update: Update, context: ContextTypes.DEFAULT_TYPE,
-                                              is_inline=False) -> bool:
+                                              is_inline=False, is_stats=False) -> bool:
         """
         Checks if the user is allowed to use the bot
         :param update: Telegram update object
         :param context: Telegram context object
         :param is_inline: Boolean flag for inline queries
         :return: Boolean indicating if the user is allowed to use the bot
-        """
-        db = self.db
+        """ 
         name = update.inline_query.from_user.name if is_inline else update.message.from_user.name
         user_id = update.inline_query.from_user.id if is_inline else update.message.from_user.id
         if not await is_allowed(self.db, update, context, is_inline=is_inline) and await is_in_trial(self.db, update, context, is_inline=is_inline):
             logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot with trial')
-            await self.send_disallowed_message(self.disallowed_message_trial, update, context, is_inline)
+            if not is_stats:
+                await self.send_disallowed_message(self.disallowed_message_trial, update, context, is_inline)
+            else:
+                await self.send_disallowed_message(self.dissalowed_stats, update, context, is_inline)
             return False
+            
         elif not await is_allowed(self.db, update, context, is_inline=is_inline) and not await is_in_trial(self.db, update, context, is_inline=is_inline):
             logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot without trial')
-            await self.send_disallowed_message(self.disallowed_message_not_trial, update, context, is_inline)
+            if not is_stats:
+                await self.send_disallowed_message(self.disallowed_message_not_trial, update, context, is_inline)
+            else:
+                await self.send_disallowed_message(self.dissalowed_stats, update, context, is_inline)
             return False
+        
         return True
 
     async def check_time_delay(self, update: Update, context: ContextTypes.DEFAULT_TYPE,
