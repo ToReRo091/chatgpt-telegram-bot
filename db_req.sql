@@ -25,7 +25,7 @@ insert into subscription values
 
 
 CREATE TABLE users (
-	user_id int4 NOT NULL,
+	user_id bigint NOT NULL,
 	date_creation timestamp NULL,
 	user_first_name varchar NULL,
 	user_last_name varchar NULL,
@@ -39,7 +39,7 @@ CREATE TABLE users (
 
 CREATE TABLE feedback (
 	feedback_id serial4 NOT NULL,
-	user_id int4 NOT NULL,
+	user_id bigint NOT NULL,
 	feedback_message varchar NOT NULL,
 	feedback_date timestamp NULL,
 	CONSTRAINT feedback_pkey PRIMARY KEY (feedback_id),
@@ -75,7 +75,7 @@ CREATE TABLE transaction (
 	transaction_id serial NOT NULL,
 	date_transaction timestamp NOT NULL,
 	transaction_amount int4 NULL,
-	user_id int4 NOT NULL,
+	user_id bigint NOT NULL,
 	subscription_id int4 NOT NULL,
 	CONSTRAINT transaction_pkey PRIMARY KEY (transaction_id),
 	CONSTRAINT user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id),

@@ -140,7 +140,7 @@ class ChatGPTTelegramBot:
 
         try:
             query = "SELECT date_start, date_expiration FROM users WHERE user_id = %s"
-            list_date = db.fetch_all(query, (str(user_id),))
+            list_date = db.fetch_all(query, (user_id,))
             start_date = list_date[0][0]
             end_date = list_date[0][1]
             rest_time = list_date[0][1] - datetime.datetime.now()
@@ -265,8 +265,6 @@ class ChatGPTTelegramBot:
         Resets the conversation.
         """
         logging.info(f'User {update.message.from_user.name} catch \ reset command ')
-        db = self.db
-        user_id = str(update.message.from_user.id)
         if not await self.check_allowed(update, context):
             logging.warning(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
                             f'is not allowed to reset the conversation')
@@ -315,7 +313,7 @@ class ChatGPTTelegramBot:
             try:
                 db = self.db
                 insert_query = "INSERT INTO feedback (user_id, feedback_message, feedback_date) VALUES(%s, %s, %s);"
-                db.query_update(insert_query, (str(user_id), feedback_message, datetime.datetime.now()))
+                db.query_update(insert_query, user_id, feedback_message, datetime.datetime.now())
                 response = localized_text('feedback_response', bot_language)
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
             except Exception as e:

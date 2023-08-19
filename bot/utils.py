@@ -136,7 +136,7 @@ async def error_handler(_: object, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def get_date_expiration(user_id, db):
     """Получаем дату окончания подписки, если она вообще есть"""
     try:
-        date_exp = db.fetch_one("SELECT date_expiration FROM users WHERE user_id = %s", (str(user_id),))
+        date_exp = db.fetch_one("SELECT date_expiration FROM users WHERE user_id = %s", (user_id,))
     except:
         error_handler()
     if date_exp is not None:
@@ -147,7 +147,7 @@ async def get_trial_access(user_id, db):
     trial_access_query = "UPDATE users SET trial_flag = 'Y', date_expiration = %s, date_start = %s, subscription_id = 2 WHERE user_id = %s"
     date_exp = await set_date_expiration(3, datetime.now())
     try:
-        check_res = db.query_update(trial_access_query, (date_exp, datetime.now(), str(user_id),), "User %s got trial access for 3 days" % user_id)
+        check_res = db.query_update(trial_access_query, (date_exp, datetime.now(), user_id,), "User %s got trial access for 3 days" % user_id)
     except:
         error_handler()
 
@@ -159,13 +159,13 @@ async def get_subscribe_access(user_id, db):
     subscription_access_query = "UPDATE users SET trial_flag = 'Y', date_expiration = %s, date_start = %s, subscription_id = 1 WHERE user_id = %s"
     transaction_query = "INSERT INTO transaction(date_transaction, transaction_amount, user_id, subscription_id) VALUES (%s, (SELECT subscription_price FROM subscription WHERE subscription_id = %s), %s, %s)"
     if await get_date_expiration(user_id, db) is not None:
-        date_exp = await set_date_expiration(30, await get_date_expiration(str(user_id), db))
+        date_exp = await set_date_expiration(30, await get_date_expiration(user_id, db))
     else: 
         date_exp = await set_date_expiration(30, datetime.now())
 
     try:
         check_res = db.query_update(subscription_access_query, (date_exp, datetime.now(), str(user_id),), "User %s got subscription access for 30 days" % user_id)
-        db.query_update(transaction_query, (date_exp, 1, str(user_id), 1,))
+        db.query_update(transaction_query, (date_exp, 1, user_id, 1,))
     except:
         error_handler()
     if check_res != None:
@@ -188,7 +188,7 @@ async def is_allowed(db, update: Update, context: CallbackContext, is_inline=Fal
     user_id = update.inline_query.from_user.id if is_inline else update.message.from_user.id
     today = datetime.now()
     try:
-        date_exp = db.fetch_one("SELECT date_expiration FROM users WHERE user_id = %s", (str(user_id),))
+        date_exp = db.fetch_one("SELECT date_expiration FROM users WHERE user_id = %s", (user_id,))
     except Exception as e:
         logging.error(f'Database error while performing extraction {e}')
     if date_exp is not None and date_exp >= today:
@@ -202,7 +202,7 @@ async def is_in_trial(db, update: Update, context: CallbackContext, is_inline=Fa
     user_id = update.callback_query.from_user.id if is_inline else update.message.from_user.id
     request_on_user = "SELECT trial_flag FROM users WHERE user_id = %s"
     try:
-        user_trial = db.fetch_one(request_on_user, (str(user_id),))
+        user_trial = db.fetch_one(request_on_user, (user_id),)
     except Exception as e:
         logging.error(f'Database error while performing extraction {e}')
     if user_trial == "N":
