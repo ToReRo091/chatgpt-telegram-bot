@@ -202,7 +202,7 @@ async def is_in_trial(db, update: Update, context: CallbackContext, is_inline=Fa
     user_id = update.callback_query.from_user.id if is_inline else update.message.from_user.id
     request_on_user = "SELECT trial_flag FROM users WHERE user_id = %s"
     try:
-        user_trial = db.fetch_one(request_on_user, (user_id),)
+        user_trial = db.fetch_one(request_on_user, (user_id, ),)
     except Exception as e:
         logging.error(f'Database error while performing extraction {e}')
     if user_trial == "N":
