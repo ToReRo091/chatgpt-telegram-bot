@@ -64,7 +64,7 @@ class ChatGPTTelegramBot:
         self.success_activate_subscribtion = localized_text('success_activate_subscribtion', bot_language)
         self.frequency_message = localized_text('frequency_error', bot_language)
         self.censor_message = localized_text('censor_error', bot_language)
-        self.disallowed_stats = localized_text('disalowed_stats', bot_language)
+        self.disallowed_stats = localized_text('disallowed_stats', bot_language)
         self.usage = {}
         self.last_message = {}
         self.inline_queries_cache = {}
@@ -593,7 +593,7 @@ class ChatGPTTelegramBot:
             if not is_stats:
                 await self.send_disallowed_message(self.disallowed_message_trial, update, context, is_inline)
             else:
-                await self.send_disallowed_message(self.dissalowed_stats, update, context, is_inline)
+                await self.send_disallowed_message(self.disallowed_stats, update, context, is_inline)
             return False
             
         elif not await is_allowed(self.db, update, context, is_inline=is_inline) and not await is_in_trial(self.db, update, context, is_inline=is_inline):
@@ -601,7 +601,7 @@ class ChatGPTTelegramBot:
             if not is_stats:
                 await self.send_disallowed_message(self.disallowed_message_not_trial, update, context, is_inline)
             else:
-                await self.send_disallowed_message(self.dissalowed_stats, update, context, is_inline)
+                await self.send_disallowed_message(self.disallowed_stats, update, context, is_inline)
             return False
         
         return True
