@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'telegram-bot'
+    static_configs:
+      - targets: ['telegram_bot:80']  # Имя сервиса в вашем Docker Compose
