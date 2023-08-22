@@ -6,9 +6,27 @@ from dotenv import load_dotenv
 from openai_helper import OpenAIHelper, default_max_tokens
 from telegram_bot import ChatGPTTelegramBot
 from db import Database
+from flask import Flask, jsonify
+import threading
+
+app = Flask("endpoint")
 
 
 def main():
+    @app.route('/healthcheck', methods=['GET'])
+    def healthcheck():
+        try:
+            db.fetch_one("SELECT 1")
+            return jsonify(status="healthy"), 200
+        except:
+            return jsonify(status="unhealthy"), 500
+
+    def run_flask():
+        app.run(port=8080)
+
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
     # Read .env file
     load_dotenv()
 
@@ -93,7 +111,6 @@ def main():
     db = Database(config=db_config)
     telegram_bot = ChatGPTTelegramBot(db, config=telegram_config, openai=openai_helper)
     telegram_bot.run()
-
 
 if __name__ == '__main__':
     main()

@@ -44,10 +44,12 @@ services:
     networks:
       - postgres
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   # prometheus:
   #   image: prom/prometheus
@@ -60,10 +62,9 @@ services:
   #     - '--config.file=/etc/prometheus/prometheus.yml'
   #     - '--storage.tsdb.path=/prometheus'
   #   networks:
-  #     - prometheus
+  #     - postgres
   #   depends_on:
   #     - telegram_bot
-
   # grafana:
   #   image: grafana/grafana
   #   restart: always
@@ -75,7 +76,7 @@ services:
   #   depends_on:
   #     - prometheus
   #   networks:
-  #     - prometheus
+  #     - postgres
       
 volumes:
   pgadmin-data:
