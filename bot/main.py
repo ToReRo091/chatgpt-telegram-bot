@@ -20,6 +20,10 @@ def main():
             return jsonify(status="healthy"), 200
         except:
             return jsonify(status="unhealthy"), 500
+        
+    @app.route('/monitor_resources', methods=['GET'])
+    def monitor_resources():
+        return
 
     def run_flask():
         app.run(port=8080)

@@ -104,6 +104,19 @@ class ChatGPTTelegramBot:
             logging.info(f'{username} tries to re-register')
             await update.message.reply_text(localized_text('error', self.config['bot_language']))
 
+    # def monitor_resources():
+    # # Получаем использование CPU, RAM, дискового пространства
+    #     cpu_percent = psutil.cpu_percent()
+    #     ram_percent = psutil.virtual_memory().percent
+    #     disk_percent = psutil.disk_usage('/').percent
+
+    #     # Выводим информацию в консоль или в лог-файл
+    #     print(f"CPU: {cpu_percent}%")
+    #     print(f"RAM: {ram_percent}%")
+    #     print(f"Disk: {disk_percent}%")
+
+    #     # Можно также отправить информацию в бота в виде сообщения
+    #     bot.send_message(chat_id, f"CPU: {cpu_percent}%\nRAM: {ram_percent}%\nDisk: {disk_percent}%")
 
     async def help(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         """
